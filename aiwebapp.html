@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .word {
+            font-size: 2em;
+            letter-spacing: 0.5em;
+        }
+        .keyboard {
+            margin-top: 20px;
+        }
+        .keyboard button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+        .game-over {
+            font-size: 1.5em;
+            color: red;
+        }
+        .winner {
+            font-size: 1.5em;
+            color: green;
+        }
+        .used {
+            background-color: black;
+            color: white;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <p>Guess the word before you run out of attempts!</p>
+    <div class="game-container">
+        <div class="word" id="word"></div>
+        <p id="message"></p>
+        <p>Remaining Attempts: <span id="attempts">6</span></p>
+        <div class="keyboard" id="keyboard"></div>
+    </div>
+    <button id="restart" class="hidden">Restart</button>
+
+    <script>
+        const words = [
+            "ALABAMA", "ALASKA", "ARIZONA", "ARKANSAS", "CALIFORNIA", "COLORADO", "CONNECTICUT", "DELAWARE", "FLORIDA", "GEORGIA",
+            "HAWAII", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KANSAS", "KENTUCKY", "LOUISIANA", "MAINE", "MARYLAND",
+            "MASSACHUSETTS", "MICHIGAN", "MINNESOTA", "MISSISSIPPI", "MISSOURI", "MONTANA", "NEBRASKA", "NEVADA", "NEW HAMPSHIRE", "NEW JERSEY",
+            "NEW MEXICO", "NEW YORK", "NORTH CAROLINA", "NORTH DAKOTA", "OHIO", "OKLAHOMA", "OREGON", "PENNSYLVANIA", "RHODE ISLAND", "SOUTH CAROLINA",
+            "SOUTH DAKOTA", "TENNESSEE", "TEXAS", "UTAH", "VERMONT", "VIRGINIA", "WASHINGTON", "WEST VIRGINIA", "WISCONSIN", "WYOMING",
+            "ARGENTINA", "AUSTRALIA", "AUSTRIA", "BELGIUM", "BRAZIL", "CANADA", "CHILE", "CHINA", "COLOMBIA", "CUBA",
+            "CZECHIA", "DENMARK", "DOMINICAN REPUBLIC", "ECUADOR", "EGYPT", "EL SALVADOR", "FINLAND", "FRANCE", "GERMANY", "GREECE",
+            "GUATEMALA", "HONDURAS", "HUNGARY", "ICELAND", "INDIA", "INDONESIA", "IRELAND", "ISRAEL", "ITALY", "JAMAICA",
+            "JAPAN", "KENYA", "MALAYSIA", "MEXICO", "MOROCCO", "NETHERLANDS", "NEW ZEALAND", "NIGERIA", "NORWAY", "PANAMA",
+            "PERU", "PHILIPPINES", "POLAND", "PORTUGAL", "ROMANIA", "RUSSIA", "SAUDI ARABIA", "SINGAPORE", "SOUTH AFRICA", "SOUTH KOREA",
+            "SPAIN", "SWEDEN", "SWITZERLAND", "THAILAND", "TURKEY", "UKRAINE", "UNITED KINGDOM", "UNITED STATES", "VENEZUELA", "VIETNAM"
+        ];
+
+        const maxAttempts = 6;
+        let wordToGuess;
+        let guessedLetters;
+        let remainingAttempts;
+
+        const wordElement = document.getElementById('word');
+        const keyboardElement = document.getElementById('keyboard');
+        const messageElement = document.getElementById('message');
+        const attemptsElement = document.getElementById('attempts');
+        const restartButton = document.getElementById('restart');
+
+        function initializeGame() {
+            wordToGuess = words[Math.floor(Math.random() * words.length)];
+            guessedLetters = new Set();
+            remainingAttempts = maxAttempts;
+
+            wordElement.textContent = '_ '.repeat(wordToGuess.length).trim();
+            keyboardElement.innerHTML = '';
+            messageElement.textContent = '';
+            attemptsElement.textContent = remainingAttempts;
+            restartButton.classList.add('hidden');
+
+            for (let i = 65; i <= 90; i++) {
+                const button = document.createElement('button');
+                button.textContent = String.fromCharCode(i);
+                button.addEventListener('click', () => handleGuess(button, button.textContent));
+                keyboardElement.appendChild(button);
+            }
+        }
+
+        function handleGuess(button, letter) {
+            if (guessedLetters.has(letter)) return;
+            guessedLetters.add(letter);
+
+            button.classList.add('used');
+            button.disabled = true;
+
+            if (wordToGuess.includes(letter)) {
+                updateWordDisplay(letter);
+                if (!wordElement.textContent.includes('_')) {
+                    messageElement.textContent = 'You win!';
+                    messageElement.classList.add('winner');
+                    keyboardElement.innerHTML = '';
+                    restartButton.classList.remove('hidden');
+                }
+            } else {
+                remainingAttempts--;
+                attemptsElement.textContent = remainingAttempts;
+                if (remainingAttempts === 0) {
+                    messageElement.textContent = `Game Over! The word was ${wordToGuess}.`;
+                    messageElement.classList.add('game-over');
+                    keyboardElement.innerHTML = '';
+                    restartButton.classList.remove('hidden');
+                }
+            }
+        }
+
+        function updateWordDisplay(letter) {
+            const displayedWord = wordElement.textContent.split(' ');
+            for (let i = 0; i < wordToGuess.length; i++) {
+                if (wordToGuess[i] === letter) {
+                    displayedWord[i] = letter;
+                }
+            }
+            wordElement.textContent = displayedWord.join(' ');
+        }
+
+        restartButton.addEventListener('click', initializeGame);
+
+        initializeGame();
+    </script>
+</body>
+</html>
